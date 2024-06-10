@@ -18,7 +18,8 @@ class SearchViewModel : ViewModel() {
     var userInput by mutableStateOf("")
         private set
 
-    private val tickerApiService = TickerApiService.create()
+    //private val tickerApiService = TickerApiService.create()
+    private val tickerApiService: TickerApiService = TickerApiService.create()
 
     fun updateUserInput(input: String) {
         userInput = input
@@ -36,11 +37,40 @@ class SearchViewModel : ViewModel() {
                 println("Odpoveď zo servera pre ticker $userInput: $response")
                 if (response.isNotEmpty()) {
                     println("Ticker $userInput je platný.")
+                    val companyData = response.first()
+                    println("Symbol: ${companyData.symbol}")
+                    println("Price: ${companyData.price}")
+                    println("Beta: ${companyData.beta}")
+                    println("Currency: ${companyData.currency}")
+                    println("DCF: ${companyData.dcf}")
+                    println("Image: ${companyData.image}")
                     _uiState.update { currentState ->
                         currentState.copy(isInputWrong = false)
                     }
+                    // Fetch ratios data
+                    try {
+                        val ratiosResponse = tickerApiService.getCompanyRatios(userInput)
+                        if (ratiosResponse.isNotEmpty()) {
+                            val ratiosData = ratiosResponse.first()
+                            println("Dividend Yield Percentage TTM: ${ratiosData.dividendYielPercentageTTM}")
+                            println("PE Ratio TTM: ${ratiosData.peRatioTTM}")
+                            println("Payout Ratio TTM: ${ratiosData.payoutRatioTTM}")
+                            println("Dividend Per Share TTM: ${ratiosData.dividendPerShareTTM}")
+                            println("Return On Equity TTM: ${ratiosData.returnOnEquityTTM}")
+                            println("Return On Capital Employed TTM: ${ratiosData.returnOnCapitalEmployedTTM}")
+                            println("Gross Profit Margin TTM: ${ratiosData.grossProfitMarginTTM}")
+                            println("Operating Profit Margin TTM: ${ratiosData.operatingProfitMarginTTM}")
+                            println("Debt Equity Ratio TTM: ${ratiosData.debtEquityRatioTTM}")
+                            println("Operating Cash Flow Per Share TTM: ${ratiosData.operatingCashFlowPerShareTTM}")
+                            println("Free Cash Flow Per Share TTM: ${ratiosData.freeCashFlowPerShareTTM}")
+                            println("Price To Operating Cash Flows Ratio TTM: ${ratiosData.priceToOperatingCashFlowsRatioTTM}")
+                        } else {
+                            println("Neboli nájdené žiadne údaje pre ticker $userInput z druhého endpointu.")
+                        }
+                    } catch (e: Exception) {
+                        println("Chyba pri získavaní údajov z druhého endpointu: ${e.message}")
+                    }
                 } else {
-                    println("Ticker $userInput je neplatný.")
                     _uiState.update { currentState ->
                         currentState.copy(isInputWrong = true)
                     }

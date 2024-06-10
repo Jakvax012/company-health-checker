@@ -6,7 +6,6 @@ import retrofit2.http.GET
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-data class CompanyProfile(val symbol: String, val name: String)
 
 interface TickerApiService {
     @GET("profile/{ticker}")
@@ -14,6 +13,12 @@ interface TickerApiService {
         @Path("ticker") ticker: String,
         @Query("apikey") apiKey: String = "PrV6W7tS0N7U60N1ipF46tH66Qccto6A"
     ): List<CompanyProfile>
+
+    @GET("ratios-ttm/{ticker}")
+    suspend fun getCompanyRatios(
+        @Path("ticker") ticker: String,
+        @Query("apikey") apiKey: String = "PrV6W7tS0N7U60N1ipF46tH66Qccto6A"
+    ): List<CompanyRatios>
 
     companion object {
         private const val BASE_URL = "https://financialmodelingprep.com/api/v3/"
