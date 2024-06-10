@@ -1,5 +1,6 @@
 package com.example.company_health_checker.ui
 
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,16 +10,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -28,11 +31,16 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.company_health_checker.R
 
 @Preview(showBackground = true)
 @Composable
-fun SearchScreen(modifier: Modifier = Modifier) {
+fun SearchScreen(
+    modifier: Modifier = Modifier,
+    searchViewModel: SearchViewModel = viewModel(),
+) {
+    val searchUiState by searchViewModel.uiState.collectAsState()
     Column (
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -40,14 +48,24 @@ fun SearchScreen(modifier: Modifier = Modifier) {
             .verticalScroll(rememberScrollState())
     ) {
         SearchTitle()
-        SearchBar()
+        SearchBar(
+            userInput = searchViewModel.userInput,
+            onUserInputChange = { searchViewModel.updateUserInput(it) },
+            onKeyboardDone = { searchViewModel.checkUserInput() },
+            isInputWrong = searchUiState.isInputWrong
+        )
     }
 }
 
 @Composable
 fun SearchBar(
+    userInput: String,
+    onUserInputChange: (String) -> Unit,
+    onKeyboardDone: () -> Unit,
+    isInputWrong: Boolean,
     modifier: Modifier = Modifier
 ) {
+    Log.d("SearchBar", "Stav isInputWrong: $isInputWrong")
     Column (
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -65,23 +83,35 @@ fun SearchBar(
                 .padding(0.dp, 15.dp)
         )
         OutlinedTextField(
-            value = "",
-            onValueChange = {},
-            label = {Text(stringResource(R.string.enter_ticker))},
+            value = userInput,
+            onValueChange = onUserInputChange,
+            label = {
+                Text(
+                    text = if (isInputWrong) {
+                        stringResource(R.string.invalid_ticker)
+                    } else {
+                        stringResource(R.string.enter_ticker)
+                    },
+                    color = if (isInputWrong) Color.Red else Color.Unspecified
+                )
+            },
             shape = RoundedCornerShape(32.dp),
             colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color(0xFF7B27FF),
-                unfocusedBorderColor = Color(0xFFADADAD),
+                focusedBorderColor = if (isInputWrong) Color.Red else Color(0xFF7B27FF),
+                unfocusedBorderColor = if (isInputWrong) Color.Red else Color(0xFFADADAD),
                 unfocusedTextColor = Color(0xFFADADAD),
-                unfocusedLabelColor = Color(0xFFADADAD),
+                unfocusedLabelColor = if (isInputWrong) Color.Red else Color(0xFFADADAD),
             ),
             singleLine = true,
+            keyboardActions = KeyboardActions(
+                onDone = { onKeyboardDone() }
+            ),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 5.dp)
         )
         Button(
-            onClick = { /*TODO*/ },
+            onClick = onKeyboardDone,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF7B27FF)),
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -97,7 +127,7 @@ fun SearchTitle(modifier: Modifier = Modifier) {
     Column (
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
-            .padding(20.dp,10.dp)
+            .padding(20.dp, 10.dp)
     ) {
         Text(
             text = stringResource(id = R.string.app_name),

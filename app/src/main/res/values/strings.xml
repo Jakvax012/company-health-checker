@@ -4,5 +4,6 @@
     <string name="search">Search...</string>
     <string name="enter_ticker">Enter ticker of the company</string>
     <string name="enter_ticker_description">Enter ticker of the company you want to search...</string>
+    <string name="invalid_ticker">Invalid ticker symbol. Please try again.</string>
 
 </resources>
