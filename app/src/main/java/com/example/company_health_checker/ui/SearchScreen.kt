@@ -1,59 +1,68 @@
 package com.example.company_health_checker.ui
 
-import android.util.Log
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.company_health_checker.R
+import com.example.company_health_checker.Screen
+import kotlinx.coroutines.launch
 
-@Preview(showBackground = true)
 @Composable
 fun SearchScreen(
+    navController: NavController,
+    searchViewModel: SearchViewModel,
     modifier: Modifier = Modifier,
-    searchViewModel: SearchViewModel = viewModel(),
 ) {
     val searchUiState by searchViewModel.uiState.collectAsState()
-    Column (
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val coroutineScope = rememberCoroutineScope()
+
+    Column(
         modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
+            .padding(horizontal = 16.dp, vertical = 24.dp),
+        verticalArrangement = Arrangement.SpaceBetween,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SearchTitle()
+        Spacer(modifier = Modifier.weight(0.5f))
         SearchBar(
+            isInputWrong = searchUiState.isInputWrong,
             userInput = searchViewModel.userInput,
             onUserInputChange = { searchViewModel.updateUserInput(it) },
-            onKeyboardDone = { searchViewModel.checkUserInput() },
-            isInputWrong = searchUiState.isInputWrong
+            onKeyboardDone = {
+                // funkcia checkUserInput bude vykonaná v rámci coroutine a po jej vykonaní sa skontroluje stav isInputWrong
+                // bez tohto sa nestihla aktualizovať isInputWrong a tým pádom sa mohlo prejsť na druhú obrazovku aj bez toho, aby bol ticker správny
+                coroutineScope.launch {
+                    searchViewModel.checkUserInput()
+                    if (!searchViewModel.uiState.value.isInputWrong) {
+                        navController.navigate(Screen.CompanyScreen.name)
+                    }
+                }
+            },
         )
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 
@@ -65,8 +74,7 @@ fun SearchBar(
     isInputWrong: Boolean,
     modifier: Modifier = Modifier
 ) {
-    Log.d("SearchBar", "Stav isInputWrong: $isInputWrong")
-    Column (
+    Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -124,7 +132,7 @@ fun SearchBar(
 
 @Composable
 fun SearchTitle(modifier: Modifier = Modifier) {
-    Column (
+    Column(
         verticalArrangement = Arrangement.Top,
         modifier = Modifier
             .padding(20.dp, 10.dp)

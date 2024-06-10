@@ -5,6 +5,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavController
+import com.example.company_health_checker.Screen
 import com.example.company_health_checker.data.TickerApiService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,55 +32,42 @@ class SearchViewModel : ViewModel() {
         }
     }
 
-    fun checkUserInput() {
-        viewModelScope.launch {
-            try {
-                val response = tickerApiService.getCompanyProfile(userInput)
-                println("Odpoveď zo servera pre ticker $userInput: $response")
-                if (response.isNotEmpty()) {
-                    println("Ticker $userInput je platný.")
-                    val companyData = response.first()
-                    println("Symbol: ${companyData.symbol}")
-                    println("Price: ${companyData.price}")
-                    println("Beta: ${companyData.beta}")
-                    println("Currency: ${companyData.currency}")
-                    println("DCF: ${companyData.dcf}")
-                    println("Image: ${companyData.image}")
-                    _uiState.update { currentState ->
-                        currentState.copy(isInputWrong = false)
-                    }
-                    // Fetch ratios data
-                    try {
-                        val ratiosResponse = tickerApiService.getCompanyRatios(userInput)
-                        if (ratiosResponse.isNotEmpty()) {
-                            val ratiosData = ratiosResponse.first()
-                            println("Dividend Yield Percentage TTM: ${ratiosData.dividendYielPercentageTTM}")
-                            println("PE Ratio TTM: ${ratiosData.peRatioTTM}")
-                            println("Payout Ratio TTM: ${ratiosData.payoutRatioTTM}")
-                            println("Dividend Per Share TTM: ${ratiosData.dividendPerShareTTM}")
-                            println("Return On Equity TTM: ${ratiosData.returnOnEquityTTM}")
-                            println("Return On Capital Employed TTM: ${ratiosData.returnOnCapitalEmployedTTM}")
-                            println("Gross Profit Margin TTM: ${ratiosData.grossProfitMarginTTM}")
-                            println("Operating Profit Margin TTM: ${ratiosData.operatingProfitMarginTTM}")
-                            println("Debt Equity Ratio TTM: ${ratiosData.debtEquityRatioTTM}")
-                            println("Operating Cash Flow Per Share TTM: ${ratiosData.operatingCashFlowPerShareTTM}")
-                            println("Free Cash Flow Per Share TTM: ${ratiosData.freeCashFlowPerShareTTM}")
-                            println("Price To Operating Cash Flows Ratio TTM: ${ratiosData.priceToOperatingCashFlowsRatioTTM}")
-                        } else {
-                            println("Neboli nájdené žiadne údaje pre ticker $userInput z druhého endpointu.")
-                        }
-                    } catch (e: Exception) {
-                        println("Chyba pri získavaní údajov z druhého endpointu: ${e.message}")
-                    }
-                } else {
-                    _uiState.update { currentState ->
-                        currentState.copy(isInputWrong = true)
-                    }
+    suspend fun checkUserInput() {
+        // Company data - first endpoint
+        try {
+            val profileResponse = tickerApiService.getCompanyProfile(userInput)
+            if (profileResponse.isNotEmpty()) {
+                val companyProfile = profileResponse.first()
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        isInputWrong = false,
+                        companyProfile = companyProfile,
+                    )
                 }
-            } catch (e: Exception) {
+
+                // Ratios data - second endpoint, start only if Ticker was correct
+                // and response from first endpoint was not empty
+                try {
+                    val ratiosResponse = tickerApiService.getCompanyRatios(userInput)
+                    if (ratiosResponse.isNotEmpty()) {
+                        val companyRatios = ratiosResponse.first()
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                companyRatios = companyRatios
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    println("Error retrieving data from second endpoint: ${e.message}")
+                }
+            } else {
                 _uiState.update { currentState ->
                     currentState.copy(isInputWrong = true)
                 }
+            }
+        } catch (e: Exception) {
+            _uiState.update { currentState ->
+                currentState.copy(isInputWrong = true)
             }
         }
     }

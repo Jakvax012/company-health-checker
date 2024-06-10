@@ -14,6 +14,8 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,93 +26,113 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.company_health_checker.R
+import coil.compose.rememberImagePainter
 
 @Composable
-fun TopInfo() {
-    Row(
+fun CompanyScreen(searchViewModel: SearchViewModel) {
+    val searchUiState by searchViewModel.uiState.collectAsState()
+
+    Column (
         modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+            .verticalScroll(rememberScrollState())
     ) {
-       Image(
-            painter = painterResource(id = R.drawable.microsoft_logo_icon_png_transparent_background), // Replace with your image resource
-            contentDescription = "Company Logo",
-            modifier = Modifier.size(100.dp),
-            contentScale = ContentScale.Crop
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Column {
-            Text(
-                text = "Microsoft Corporation",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-            Text(
-                text = "MSFT",
-                fontSize = 16.sp,
-                color = Color.Gray
-            )
-            Text(
-                text = "$425.52",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF7B27FF)
-            )
-            Text(
-                text = "4:00 PM 04/05/24",
-                fontSize = 14.sp,
-                color = Color.Gray
-            )
-        }
-        Spacer(modifier = Modifier.weight(1f))
-        Icon(
-            imageVector = Icons.Default.FavoriteBorder,
-            contentDescription = "Favorite",
-            modifier = Modifier.size(24.dp)
-        )
+        TopInfo(searchUiState)
+        Divider(color = Color(0xFFADADAD), thickness = 1.dp)
+        CompanyData(searchUiState)
     }
 }
 
 @Composable
-fun CompanyData() {
-    Column(
-        modifier = Modifier.padding(16.dp)
-    ) {
-        Text(text = "Dividend information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
+fun TopInfo(searchUiState: SearchUiState) {
+    searchUiState.companyProfile?.let { profile ->
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            CompanyInfoBox("Dividend yield", "0.71 %")
-            CompanyInfoBox("Dividend rate", "$3.00")
+            Box(
+                modifier = Modifier
+                    .size(100.dp)
+                    .background(Color(0xFFE6E6E6), shape = RoundedCornerShape(16.dp)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    painter = rememberImagePainter(data = profile.image),
+                    contentDescription = "Company Logo",
+                    modifier = Modifier.size(75.dp),
+                    contentScale = ContentScale.Crop,
+                )
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = profile.companyName ?: "N/A",
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = profile.symbol,
+                    fontSize = 16.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "${profile.price} $",
+                    fontSize = 24.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF7B27FF)
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.FavoriteBorder,
+                contentDescription = "Favorite",
+                modifier = Modifier.size(24.dp)
+            )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
+    }
+}
+
+@Composable
+fun CompanyData(searchUiState: SearchUiState) {
+    searchUiState.companyRatios?.let { ratios ->
+        Column(
+            modifier = Modifier.padding(16.dp)
         ) {
-            CompanyInfoBox("Div. increase", "10 %")
-            CompanyInfoBox("FCF payout ratio", "34 %")
-        }
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(text = "Financial information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            CompanyInfoBox("EPS", "$9.81")
-            CompanyInfoBox("EPS increase YoY", "9.31 %")
-        }
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            CompanyInfoBox("FCPS", "$7.91")
-            CompanyInfoBox("FCPS increase YoY", "-10.22 %")
+            Text(text = "Dividend information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("Dividend yield", "${"%.2f".format(ratios.dividendYielPercentageTTM)} %")
+                CompanyInfoBox("Dividend rate", "${"%.2f".format(ratios.dividendPerShareTTM)} $")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("Payout ratio", "${"%.2f".format(ratios.payoutRatioTTM)}")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Financial information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("EPS", "N/A")
+                CompanyInfoBox("EPS increase YoY", "N/A")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("FCPS", "N/A")
+                CompanyInfoBox("FCPS increase YoY", "N/A")
+            }
         }
     }
 }
@@ -129,22 +151,4 @@ fun CompanyInfoBox(label: String, value: String) {
         Spacer(modifier = Modifier.height(4.dp))
         Text(text = value, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color(0xFF7B27FF))
     }
-}
-
-@Composable
-fun CompanyScreen() {
-    Column (
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-    ) {
-        TopInfo()
-        Divider(color = Color(0xFFADADAD), thickness = 1.dp)
-        CompanyData()
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun PreviewCompanyScreen() {
-    CompanyScreen()
 }

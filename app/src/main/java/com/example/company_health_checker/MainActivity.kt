@@ -24,9 +24,13 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    SearchScreen()
+                    MainScreen()
                 }
             }
         }
     }
+}
+@Composable
+fun MainScreen() {
+    AppNavigation()
 }
