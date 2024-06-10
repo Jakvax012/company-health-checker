@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Company_Health_Checker</string>
+    <string name="app_name">Company Health Checker</string>
+    <string name="subtitle_search">Check financial health of the company simply and clearly</string>
+    <string name="search">Search...</string>
+    <string name="enter_ticker">Enter ticker of the company</string>
+    <string name="enter_ticker_description">Enter ticker of the company you want to search...</string>
+
 </resources>
