@@ -5,5 +5,20 @@
     <string name="enter_ticker">Enter ticker of the company</string>
     <string name="enter_ticker_description">Enter ticker of the company you want to search...</string>
     <string name="invalid_ticker">Invalid ticker symbol. Please try again.</string>
+    <string name="back_to_search">Back to search...</string>
+    <string name="dividend_information">Dividend information</string>
+    <string name="dividend_yield">Dividend yield</string>
+    <string name="dividend_rate">Dividend rate</string>
+    <string name="payout_ratio">Payout ratio</string>
+    <string name="free_cash_flow">Free cash flow</string>
+    <string name="cash_flow_share">Cash flow / share</string>
+    <string name="operating_cfs">Operating CF/S</string>
+    <string name="price_OCF">Price / OCF</string>
+    <string name="return_on">Return on</string>
+    <string name="roe">ROE</string>
+    <string name="roce">ROCE</string>
+    <string name="roa">ROA</string>
+
+
 
 </resources>

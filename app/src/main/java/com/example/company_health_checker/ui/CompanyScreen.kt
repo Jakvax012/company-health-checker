@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -90,12 +91,17 @@ fun TopInfo(searchUiState: SearchUiState, isFavorite: Boolean, onFavoriteClick: 
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            IconButton(onClick = { onFavoriteClick(profile) }) {
-                Icon(
-                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
-                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
-                    tint = if (isFavorite) Color.Red else Color.Gray
-                )
+            Box(
+                modifier = Modifier.width(50.dp), // Set a fixed width for the icon button
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                IconButton(onClick = { onFavoriteClick(profile) }) {
+                    Icon(
+                        imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                        contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                        tint = if (isFavorite) Color.Red else Color.Gray
+                    )
+                }
             }
         }
     }
@@ -107,55 +113,55 @@ fun CompanyData(searchUiState: SearchUiState) {
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            Text(text = "Dividend information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(id = R.string.dividend_information), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("Dividend yield", "${"%.2f".format(ratios.dividendYielPercentageTTM)} %" ?: "N/A")
-                CompanyInfoBox("Dividend rate", "${"%.2f".format(ratios.dividendPerShareTTM)} $" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.dividend_yield), "${"%.2f".format(ratios.dividendYielPercentageTTM)} %" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.dividend_rate), "${"%.2f".format(ratios.dividendPerShareTTM)} $" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("Payout ratio", "${"%.2f".format(ratios.payoutRatioTTM)}" ?: "N/A")
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Free cash flow", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                CompanyInfoBox("Cash flow / share", "${"%.2f".format(ratios.freeCashFlowPerShareTTM)}" ?: "N/A")
-                CompanyInfoBox("Operating CF/S", "${"%.2f".format(ratios.operatingCashFlowPerShareTTM)}" ?: "N/A")
-            }
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                CompanyInfoBox("Price / OCF", "${"%.2f".format(ratios.priceToOperatingCashFlowsRatioTTM)}" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.payout_ratio), "${"%.2f".format(ratios.payoutRatioTTM)}" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Return on", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = stringResource(id = R.string.free_cash_flow), fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("ROE", "${"%.2f".format(ratios.returnOnEquityTTM)}" ?: "N/A")
-                CompanyInfoBox("ROCE", "${"%.2f".format(ratios.returnOnCapitalEmployedTTM)}" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.cash_flow_share), "${"%.2f".format(ratios.freeCashFlowPerShareTTM)}" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.operating_cfs), "${"%.2f".format(ratios.operatingCashFlowPerShareTTM)}" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("ROA", "${"%.2f".format(ratios.returnOnAssetsTTM)}" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.price_OCF), "${"%.2f".format(ratios.priceToOperatingCashFlowsRatioTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = stringResource(id = R.string.return_on), fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox( stringResource(id = R.string.roe), "${"%.2f".format(ratios.returnOnEquityTTM)}" ?: "N/A")
+                CompanyInfoBox(stringResource(id = R.string.roce), "${"%.2f".format(ratios.returnOnCapitalEmployedTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox(stringResource(id = R.string.roa), "${"%.2f".format(ratios.returnOnAssetsTTM)}" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(16.dp))
             Text(text = "Margins", fontSize = 18.sp, fontWeight = FontWeight.Bold)

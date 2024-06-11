@@ -1,5 +1,6 @@
 package com.example.company_health_checker.ui
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -7,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -62,9 +64,11 @@ fun SearchScreen(
                 }
             },
         )
-        Button(
+        OutlinedButton(
             onClick = { navController.navigate(Screen.LastViewedScreen.name) },
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF7B27FF)),
+            border = BorderStroke(1.dp, Color(0xFF7B27FF))
         ) {
             Text("View Last Viewed Companies")
         }
