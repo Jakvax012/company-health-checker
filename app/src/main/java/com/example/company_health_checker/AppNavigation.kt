@@ -17,13 +17,10 @@ import com.example.company_health_checker.ui.CompanyScreen
 
 enum class Screen {
     SearchScreen,
-    CompanyScreen
+    CompanyScreen,
 }
 @Composable
-fun AppNavigation(modifier: Modifier = Modifier) {
-    val navController = rememberNavController()
-    val searchViewModel: SearchViewModel = viewModel()
-
+fun AppNavigation(navController: NavHostController, searchViewModel: SearchViewModel) {
     NavHost(navController = navController, startDestination = com.example.company_health_checker.Screen.SearchScreen.name) {
         composable(com.example.company_health_checker.Screen.SearchScreen.name) {
             SearchScreen(navController = navController, searchViewModel = searchViewModel)

@@ -12,5 +12,10 @@ data class CompanyRatios(
     val debtEquityRatioTTM: Double,
     val operatingCashFlowPerShareTTM: Double,
     val freeCashFlowPerShareTTM: Double,
-    val priceToOperatingCashFlowsRatioTTM: Double
+    val priceToOperatingCashFlowsRatioTTM: Double,
+    val returnOnAssetsTTM: Double,
+    val netProfitMarginTTM: Double,
+    val cashFlowToDebtRatioTTM: Double,
+    val priceToBookRatioTTM: Double,
+
 )

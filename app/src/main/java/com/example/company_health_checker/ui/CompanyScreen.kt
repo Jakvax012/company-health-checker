@@ -9,9 +9,11 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -27,23 +29,27 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.company_health_checker.R
 import coil.compose.rememberImagePainter
+import com.example.company_health_checker.data.CompanyProfile
 
 @Composable
 fun CompanyScreen(searchViewModel: SearchViewModel) {
     val searchUiState by searchViewModel.uiState.collectAsState()
+    val isFavorite = searchViewModel.isCompanyFavorite(searchUiState.companyProfile?.symbol ?: "").collectAsState(initial = false).value
 
-    Column (
+    Column(
         modifier = Modifier
             .verticalScroll(rememberScrollState())
     ) {
-        TopInfo(searchUiState)
+        TopInfo(searchUiState, isFavorite) { profile ->
+            searchViewModel.toggleFavoriteCompany(profile)
+        }
         Divider(color = Color(0xFFADADAD), thickness = 1.dp)
         CompanyData(searchUiState)
     }
 }
 
 @Composable
-fun TopInfo(searchUiState: SearchUiState) {
+fun TopInfo(searchUiState: SearchUiState, isFavorite: Boolean, onFavoriteClick: (CompanyProfile) -> Unit) {
     searchUiState.companyProfile?.let { profile ->
         Row(
             modifier = Modifier
@@ -84,11 +90,13 @@ fun TopInfo(searchUiState: SearchUiState) {
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                imageVector = Icons.Default.FavoriteBorder,
-                contentDescription = "Favorite",
-                modifier = Modifier.size(24.dp)
-            )
+            IconButton(onClick = { onFavoriteClick(profile) }) {
+                Icon(
+                    imageVector = if (isFavorite) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                    contentDescription = if (isFavorite) "Remove from favorites" else "Add to favorites",
+                    tint = if (isFavorite) Color.Red else Color.Gray
+                )
+            }
         }
     }
 }
@@ -105,33 +113,100 @@ fun CompanyData(searchUiState: SearchUiState) {
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("Dividend yield", "${"%.2f".format(ratios.dividendYielPercentageTTM)} %")
-                CompanyInfoBox("Dividend rate", "${"%.2f".format(ratios.dividendPerShareTTM)} $")
+                CompanyInfoBox("Dividend yield", "${"%.2f".format(ratios.dividendYielPercentageTTM)} %" ?: "N/A")
+                CompanyInfoBox("Dividend rate", "${"%.2f".format(ratios.dividendPerShareTTM)} $" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("Payout ratio", "${"%.2f".format(ratios.payoutRatioTTM)}")
+                CompanyInfoBox("Payout ratio", "${"%.2f".format(ratios.payoutRatioTTM)}" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = "Financial information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Text(text = "Free cash flow", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("EPS", "N/A")
-                CompanyInfoBox("EPS increase YoY", "N/A")
+                CompanyInfoBox("Cash flow / share", "${"%.2f".format(ratios.freeCashFlowPerShareTTM)}" ?: "N/A")
+                CompanyInfoBox("Operating CF/S", "${"%.2f".format(ratios.operatingCashFlowPerShareTTM)}" ?: "N/A")
             }
             Spacer(modifier = Modifier.height(8.dp))
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                CompanyInfoBox("FCPS", "N/A")
-                CompanyInfoBox("FCPS increase YoY", "N/A")
+                CompanyInfoBox("Price / OCF", "${"%.2f".format(ratios.priceToOperatingCashFlowsRatioTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Return on", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("ROE", "${"%.2f".format(ratios.returnOnEquityTTM)}" ?: "N/A")
+                CompanyInfoBox("ROCE", "${"%.2f".format(ratios.returnOnCapitalEmployedTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("ROA", "${"%.2f".format(ratios.returnOnAssetsTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Margins", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("Gross margin", "${"%.2f".format(ratios.grossProfitMarginTTM)}" ?: "N/A")
+                CompanyInfoBox("Operating margin", "${"%.2f".format(ratios.operatingProfitMarginTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("Net margin", "${"%.2f".format(ratios.netProfitMarginTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Debt ratios", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("CF/debt ratio", "${"%.2f".format(ratios.cashFlowToDebtRatioTTM)}" ?: "N/A")
+                CompanyInfoBox("Debt equity ratio", "${"%.2f".format(ratios.debtEquityRatioTTM)}" ?: "N/A")
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(text = "Other ratios", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                CompanyInfoBox("P/E ratio", "${"%.2f".format(ratios.peRatioTTM)}" ?: "N/A")
+                CompanyInfoBox("P/B ratio", "${"%.2f".format(ratios.priceToBookRatioTTM)}" ?: "N/A")
+            }
+            searchUiState.companyProfile?.let { profile ->
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(text = "Other information", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    CompanyInfoBox("Beta", "${"%.2f".format(profile.beta)}" ?: "N/A")
+                    CompanyInfoBox("DCF", "${"%.2f".format(profile.dcf)}" ?: "N/A"
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
             }
         }
     }
