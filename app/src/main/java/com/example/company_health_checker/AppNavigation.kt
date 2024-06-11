@@ -14,10 +14,12 @@ import com.example.company_health_checker.ui.SearchScreen
 import com.example.company_health_checker.ui.SearchViewModel
 import com.example.company_health_checker.Screen
 import com.example.company_health_checker.ui.CompanyScreen
+import com.example.company_health_checker.ui.LastViewedScreen
 
 enum class Screen {
     SearchScreen,
     CompanyScreen,
+    LastViewedScreen
 }
 @Composable
 fun AppNavigation(navController: NavHostController, searchViewModel: SearchViewModel) {
@@ -27,6 +29,9 @@ fun AppNavigation(navController: NavHostController, searchViewModel: SearchViewM
         }
         composable(com.example.company_health_checker.Screen.CompanyScreen.name) {
             CompanyScreen(searchViewModel = searchViewModel)
+        }
+        composable(com.example.company_health_checker.Screen.LastViewedScreen.name) {
+            LastViewedScreen(navController = navController, searchViewModel = searchViewModel)
         }
     }
 }

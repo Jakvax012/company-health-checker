@@ -62,6 +62,12 @@ fun SearchScreen(
                 }
             },
         )
+        Button(
+            onClick = { navController.navigate(Screen.LastViewedScreen.name) },
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Text("View Last Viewed Companies")
+        }
         Spacer(modifier = Modifier.weight(1f))
     }
 }

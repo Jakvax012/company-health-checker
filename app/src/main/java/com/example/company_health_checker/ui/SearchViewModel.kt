@@ -28,6 +28,7 @@ class SearchViewModel(application: Application, private val repository: Companie
     //private val tickerApiService = TickerApiService.create()
     private val tickerApiService: TickerApiService = TickerApiService.create()
 
+
     fun updateUserInput(input: String) {
         userInput = input
         if (_uiState.value.isInputWrong) {
@@ -38,9 +39,13 @@ class SearchViewModel(application: Application, private val repository: Companie
     }
 
     suspend fun checkUserInput() {
+        fetchCompanyData(userInput, false)
+    }
+
+    suspend fun fetchCompanyData(ticker: String, fromViewedScreen: Boolean) {
         // Company data - first endpoint
         try {
-            val profileResponse = tickerApiService.getCompanyProfile(userInput)
+            val profileResponse = tickerApiService.getCompanyProfile(ticker)
             if (profileResponse.isNotEmpty()) {
                 val companyProfile = profileResponse.first()
                 _uiState.update { currentState ->
@@ -49,12 +54,13 @@ class SearchViewModel(application: Application, private val repository: Companie
                         companyProfile = companyProfile,
                     )
                 }
-
-                insertCompanyIntoDatabase(companyProfile)
+                if (fromViewedScreen == false) {
+                    insertCompanyIntoDatabase(companyProfile)
+                }
                 // Ratios data - second endpoint, start only if Ticker was correct
                 // and response from first endpoint was not empty
                 try {
-                    val ratiosResponse = tickerApiService.getCompanyRatios(userInput)
+                    val ratiosResponse = tickerApiService.getCompanyRatios(ticker)
                     if (ratiosResponse.isNotEmpty()) {
                         val companyRatios = ratiosResponse.first()
                         _uiState.update { currentState ->
@@ -110,4 +116,9 @@ class SearchViewModel(application: Application, private val repository: Companie
             repository.insertCompany(favoriteCompany)
         }
     }
+
+    fun getAllCompanies(): Flow<List<FavoriteCompany>> {
+        return repository.getAllCompaniesStream()
+    }
+
 }
